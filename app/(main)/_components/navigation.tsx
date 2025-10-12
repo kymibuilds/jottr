@@ -14,6 +14,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Item } from "./item";
 import { toast } from "sonner";
+import DocumentList from "./documentList";
 
 function Navigation() {
   const pathname = usePathname();
@@ -117,7 +118,7 @@ function Navigation() {
           {/* Documents section */}
           <div className="flex-1 px-3 py-2 overflow-y-auto">
             <div className="space-y-0.5">
-              
+              <DocumentList />
             </div>
           </div>
         </div>
