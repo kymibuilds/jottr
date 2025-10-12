@@ -7,7 +7,9 @@ import Logo from "./Logo";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
 import { useConvexAuth } from "convex/react";
-import { SignInButton } from "@clerk/clerk-react";
+import { SignInButton, UserButton } from "@clerk/clerk-react";
+import { Spinner } from "@/components/ui/spinner";
+import Link from "next/link";
 
 function Navbar() {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -21,7 +23,7 @@ function Navbar() {
     >
       <Logo />
       <div className="md:ml-auto md:justify-end justify-between w-full flex items-center gap-x-2">
-        {isLoading && <p>is loading...</p>}
+        {isLoading && <Spinner />}
         {!isAuthenticated && !isLoading && (
           <>
             <SignInButton mode="modal">
@@ -32,6 +34,16 @@ function Navbar() {
             </SignInButton>
           </>
         )}
+          {isAuthenticated && !isLoading && (
+            <>
+              <Button variant="default" size={"sm"} asChild>
+                <Link href={"/documents"}>
+                  Enter Nuta
+                </Link>
+              </Button>
+              <UserButton afterSignOutUrl="/"/>
+            </>
+          )}
         <ModeToggle />
       </div>
     </div>

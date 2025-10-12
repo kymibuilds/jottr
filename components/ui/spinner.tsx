@@ -2,7 +2,7 @@ import { Loader } from "lucide-react";
 import { cva, type VariantProps } from "class-variance-authority";
 import {cn} from "@/lib/utils";
 
-const spinnerVariant = cva(
+const spinnerVariants = cva(
     "text-muted-foreground animate-spin",
     {
         variants: {
@@ -19,4 +19,12 @@ const spinnerVariant = cva(
     },
 );
 
-interface SpinnerProps extends VariantProps<>
+interface SpinnerProps extends VariantProps<typeof spinnerVariants> {}
+
+export const Spinner = ({
+    size,
+}: SpinnerProps)=>{
+    return (
+        <Loader className={cn(spinnerVariants({size}))} />
+    )
+}
