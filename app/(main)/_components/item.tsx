@@ -1,19 +1,31 @@
 "use client";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useMutation } from "convex/react";
 import {
+  Archive,
   ChevronDown,
   ChevronRight,
   LucideIcon,
-  Plus,
-  PlusCircleIcon,
+  MoreHorizontal,
   PlusIcon,
+  Trash,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useUser } from "@clerk/clerk-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ItemProps {
   id?: Id<"documents">;
@@ -42,13 +54,28 @@ export const Item = ({
   level = 0,
   onExpand,
 }: ItemProps) => {
+  const { user } = useUser();
+  const archive = useMutation(api.documents.archive);
   const router = useRouter();
   const create = useMutation(api.documents.create);
+
   const handleExpand = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
     event.stopPropagation();
     onExpand?.();
+  };
+
+  const onArchive = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    event.stopPropagation();
+    if (!id) return;
+    const promise = archive({ id });
+
+    toast.promise(promise, {
+      loading: "moving to Archived",
+      success: "moved to Archived",
+      error: "failed to move to Archived",
+    });
   };
 
   const onCreate = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -119,6 +146,40 @@ export const Item = ({
       )}
       {!!id && (
         <div className="ml-auto flex items-center gap-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <div
+                role="button"
+                className="opacity-0 group-hover:opacity-100 h-4 w-4 ml-auto rounded hover:bg-neutral-300 dark:hover:bg-neutral-600"
+              >
+                <MoreHorizontal className="h-4 w-4  rounded text-muted-foreground" />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-40"
+              align="start"
+              side="right"
+              forceMount
+            >
+              {/* <DropdownMenuItem onClick={() => {}}>
+                <Trash className="h-4 w-4 mr-2 rounded text-muted-foreground" />
+                <p className="text-foreground text-sm">Delete note</p>
+              </DropdownMenuItem> */}
+              <DropdownMenuItem onClick={onArchive}>
+                <Archive className="h-4 w-4 mr-2 rounded text-muted-foreground" />
+                <p className="text-foreground text-sm">Archive note</p>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <div className="flex items-center gap-1 mx-2">
+                <p className="text-[12px] text-muted-foreground">
+                  Last edited by:
+                </p>
+                <p className="text-[12px] text-muted-foreground">
+                  {user?.fullName || "Unknown"}
+                </p>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <div
             role="button"
             onClick={onCreate}

@@ -2,9 +2,11 @@
 import {
   ChevronsLeftIcon,
   MenuIcon,
+  Plus,
   PlusCircle,
   Search,
   Settings,
+  Trash,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import React, { useState, useRef, useEffect } from "react";
@@ -15,6 +17,12 @@ import { api } from "@/convex/_generated/api";
 import { Item } from "./item";
 import { toast } from "sonner";
 import DocumentList from "./documentList";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { ModeToggle } from "@/components/mode-toggle";
 
 function Navigation() {
   const pathname = usePathname();
@@ -86,24 +94,28 @@ function Navigation() {
         style={{ width: isCollapsed ? 0 : width }}
       >
         <div className={`flex flex-col h-full ${isCollapsed ? "hidden" : ""}`}>
-          {/* Collapse button */}
-          <div className="px-3 pt-2 pb-1 flex justify-end">
-            <div
-              className="h-6 w-6 text-muted-foreground rounded-sm hover:bg-accent cursor-pointer flex items-center justify-center"
-              role="button"
-              onClick={toggleCollapse}
-              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              <ChevronsLeftIcon className="h-4 w-4" />
+          {/* Header Section */}
+          <div className="flex-shrink-0 border-b border-border/40">
+            {/* Collapse button */}
+            <div className="px-3 py-3 flex justify-end">
+              <button
+                className="h-6 w-6 text-muted-foreground rounded-sm hover:bg-accent cursor-pointer flex items-center justify-center transition-colors"
+                onClick={toggleCollapse}
+                aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                <ChevronsLeftIcon className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* User section */}
+            <div className="px-3 pb-3">
+              <UserItem />
             </div>
           </div>
 
           {/* Main navigation section */}
-          <div className="px-3 py-2 relative">
-            <UserItem />
-
-            {/* Navigation items */}
-            <div className="mt-1 space-y-0.5">
+          <div className="flex-shrink-0 px-3 py-3 border-b border-border/40">
+            <nav className="space-y-1">
               <Item onclick={() => {}} label="Search" icon={Search} isSearch />
               <Item onclick={() => {}} label="Settings" icon={Settings} />
               <Item
@@ -112,14 +124,40 @@ function Navigation() {
                 icon={PlusCircle}
                 isCreate
               />
-            </div>
+            </nav>
           </div>
 
           {/* Documents section */}
-          <div className="flex-1 px-3 py-2 overflow-y-auto">
-            <div className="space-y-0.5">
+          <div className="flex-1 overflow-y-auto px-3 py-3">
+            <div className="space-y-1">
               <DocumentList />
+              <Item onclick={handleCreate} icon={Plus} label="Add a page" />
             </div>
+          </div>
+
+          {/* Footer section */}
+          <div className="flex-shrink-0 border-t border-border/40 px-3 py-3">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="w-full flex items-center gap-x-2 px-2 py-1.5 rounded-sm hover:bg-accent text-sm text-muted-foreground transition-colors">
+                  <Trash className="h-4 w-4" />
+                  <span>Trash</span>
+                </button>
+              </PopoverTrigger>
+
+              <PopoverContent
+                className="w-72 p-0"
+                side={isMobile ? "bottom" : "right"}
+                align="start"
+              >
+                <div className="p-4">
+                  <h4 className="font-medium text-sm mb-1">Trash</h4>
+                  <p className="text-xs text-muted-foreground">
+                    No documents in trash
+                  </p>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
@@ -128,7 +166,7 @@ function Navigation() {
           <div
             ref={resizerRef}
             onMouseDown={handleMouseDown}
-            className="absolute h-full w-1 right-0 top-0 cursor-ew-resize bg-transparent hover:bg-primary/20"
+            className="absolute h-full w-1 right-0 top-0 cursor-ew-resize bg-transparent hover:bg-primary/20 transition-colors"
           />
         )}
       </aside>
@@ -137,10 +175,10 @@ function Navigation() {
       {isCollapsed && (
         <button
           onClick={toggleCollapse}
-          className="fixed top-3 left-2 z-30 h-8 w-8 flex items-center justify-center rounded-sm bg-secondary hover:bg-accent border border-border"
+          className="fixed top-3 left-3 z-30 h-9 w-9 flex items-center justify-center rounded-md bg-secondary hover:bg-accent border border-border shadow-sm transition-colors"
           aria-label="Open sidebar"
         >
-          <MenuIcon className="h-4 w-4" />
+          <MenuIcon className="h-5 w-5" />
         </button>
       )}
     </>
