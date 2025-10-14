@@ -127,22 +127,12 @@ export const restore = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-
-    if (!identity) {
-      throw new Error("Not Authenticated.");
-    }
+    if (!identity) throw new Error("Not Authenticated.");
 
     const userId = identity.subject;
-
     const existingDocument = await ctx.db.get(args.id);
-
-    if (!existingDocument) {
-      throw new Error("Document not found");
-    }
-
-    if (existingDocument.userId !== userId) {
-      throw new Error("Unauthorized");
-    }
+    if (!existingDocument) throw new Error("Document not found");
+    if (existingDocument.userId !== userId) throw new Error("Unauthorized");
 
     const recursiveRestore = async (documentId: Id<"documents">) => {
       const children = await ctx.db
@@ -158,11 +148,41 @@ export const restore = mutation({
       }
     };
 
-    const document = await ctx.db.patch(args.id, { isArchived: false });
+    await ctx.db.patch(args.id, { isArchived: false });
     await recursiveRestore(args.id);
 
-    return document;
+    return await ctx.db.get(args.id);
   },
 });
 
+export const remove = mutation({
+  args: { id: v.id("documents") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not Authenticated.");
 
+    const userId = identity.subject;
+    const existingDocument = await ctx.db.get(args.id);
+    if (!existingDocument) throw new Error("Document not found");
+    if (existingDocument.userId !== userId) throw new Error("Unauthorized");
+
+    const recursiveRemove = async (documentId: Id<"documents">) => {
+      const children = await ctx.db
+        .query("documents")
+        .withIndex("by_user_parent", (q) =>
+          q.eq("userId", userId).eq("parentDocument", documentId)
+        )
+        .collect();
+
+      for (const child of children) {
+        await recursiveRemove(child._id);
+      }
+
+      await ctx.db.delete(documentId);
+    };
+
+    await recursiveRemove(args.id);
+
+    return { success: true };
+  },
+});

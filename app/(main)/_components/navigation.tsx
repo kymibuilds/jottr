@@ -23,6 +23,7 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { ModeToggle } from "@/components/mode-toggle";
+import TrashBox from "./TrashBox";
 
 function Navigation() {
   const pathname = usePathname();
@@ -152,9 +153,7 @@ function Navigation() {
               >
                 <div className="p-4">
                   <h4 className="font-medium text-sm mb-1">Trash</h4>
-                  <p className="text-xs text-muted-foreground">
-                    No documents in trash
-                  </p>
+                  <TrashBox />
                 </div>
               </PopoverContent>
             </Popover>
