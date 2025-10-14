@@ -22,10 +22,11 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { ModeToggle } from "@/components/mode-toggle";
 import TrashBox from "./TrashBox";
+import { useSearch } from "@/hooks/use-search";
 
 function Navigation() {
+  const search = useSearch();
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [width, setWidth] = useState(240);
@@ -117,7 +118,12 @@ function Navigation() {
           {/* Main navigation section */}
           <div className="flex-shrink-0 px-3 py-3 border-b border-border/40">
             <nav className="space-y-1">
-              <Item onclick={() => {}} label="Search" icon={Search} isSearch />
+              <Item
+                onclick={search.onOpen}
+                label="Search"
+                icon={Search}
+                isSearch
+              />
               <Item onclick={() => {}} label="Settings" icon={Settings} />
               <Item
                 onclick={handleCreate}
