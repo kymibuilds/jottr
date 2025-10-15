@@ -21,54 +21,49 @@ function UserItem() {
       <DropdownMenuTrigger asChild>
         <div
           role="button"
-          className="flex items-center text-sm px-4 py-4 w-full hover:bg-primary/10 rounded-lg bg-primary/5"
+          className="flex items-center gap-2 px-2 py-2 w-full rounded-md hover:bg-gray-200/20 dark:hover:bg-gray-700/50"
         >
-          <div className="gap-x-2 flex items-center max-w-[150px]">
-            <Avatar className="h-7 w-7">
-              <AvatarImage src={user?.imageUrl} />
-            </Avatar>
-            <span className="text-start font-bold text-black/70 line-clamp-1">
-              {user?.fullName}&apos;s kitchen
-            </span>
-          </div>
-          <ChevronsLeftRight
-            className="rotate-90 ml-2"
-            strokeWidth="2"
-            size="16"
-          />
+          <Avatar className="h-6 w-6">
+            <AvatarImage src={user?.imageUrl} />
+          </Avatar>
+          <span className="text-sm font-semibold truncate dark:text-white text-gray-900">
+            {user?.fullName}&apos;s kitchen
+          </span>
+          <ChevronsLeftRight className="rotate-90 h-4 w-4 text-gray-500 dark:text-gray-400" />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-80"
+        className="w-64 bg-white dark:bg-gray-800 p-2 rounded-md shadow-lg"
         align="center"
         forceMount
         alignOffset={1}
       >
-        <DropdownMenuLabel className="py-0">
+        <DropdownMenuLabel className="p-0 mb-1 text-sm dark:text-gray-300">
           Account
-          <p className="text-sm text-black/40">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {user?.emailAddresses[0].emailAddress}
           </p>
         </DropdownMenuLabel>
 
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <ChevronsLeftRight className="mr-2 h-4 w-4" />
+        <DropdownMenuSeparator className="my-1 border-gray-200 dark:border-gray-700" />
+
+        <DropdownMenuItem className="px-2 py-1 text-sm gap-2 hover:bg-gray-200/20 dark:hover:bg-gray-700/50">
+          <ChevronsLeftRight className="h-4 w-4" />
           Switch Kitchen
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <SettingsIcon className="mr-2 h-4 w-4" />
+
+        <DropdownMenuItem className="px-2 py-1 text-sm gap-2 hover:bg-gray-200/20 dark:hover:bg-gray-700/50">
+          <SettingsIcon className="h-4 w-4" />
           Settings
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
+
+        <DropdownMenuItem asChild className="px-2 py-1 text-sm gap-2 hover:bg-gray-200/20 dark:hover:bg-gray-700/50">
           <SignOutButton>
-            <div>
-              <LogOutIcon className="mr-2 h-4 w-4" />
-              <p>Logout</p>
+            <div className="flex items-center gap-2">
+              <LogOutIcon className="h-4 w-4" />
+              Logout
             </div>
           </SignOutButton>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

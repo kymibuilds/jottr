@@ -101,10 +101,10 @@ export const Item = ({
       role="button"
       style={{ paddingLeft: level ? `${level * 12 + 12}px` : "12px" }}
       className={cn(
-        "group min-h-[27px] text-sm py-1 pr-3 w-full flex items-center font-normal gap-2 rounded-sm cursor-pointer",
+        "group min-h-[27px] text-sm py-1 pr-3 w-full flex items-center font-normal gap-2 rounded-sm cursor-pointer transition-colors duration-150",
         active
           ? "bg-primary/8 text-foreground"
-          : "text-muted-foreground hover:bg-accent/30"
+          : "text-muted-foreground hover:bg-accent/20 dark:hover:bg-accent/30"
       )}
     >
       {/* Chevron for expandable items */}

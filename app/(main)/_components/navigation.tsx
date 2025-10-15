@@ -32,11 +32,38 @@ function Navigation() {
   const params = useParams();
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const [width, setWidth] = useState(240);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [width, setWidth] = useState(() => {
+    if (typeof window !== "undefined") {
+      return Number(localStorage.getItem("sidebarWidth")) || 240;
+    }
+    return 240;
+  });
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("sidebarCollapsed") === "true";
+    }
+    return false;
+  });
+  const lastWidth = useRef(width); // store last non-collapsed width
+
   const resizerRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
   const create = useMutation(api.documents.create);
+
+  // Save width to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== "undefined" && width > 0) {
+      localStorage.setItem("sidebarWidth", width.toString());
+      lastWidth.current = width;
+    }
+  }, [width]);
+
+  // Save collapsed state to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("sidebarCollapsed", isCollapsed.toString());
+    }
+  }, [isCollapsed]);
 
   useEffect(() => {
     setIsCollapsed(isMobile);
@@ -74,7 +101,9 @@ function Navigation() {
     const onMouseMove = (moveEvent: MouseEvent) => {
       if (!isResizing.current) return;
       const newWidth = startWidth + (moveEvent.clientX - startX);
-      if (newWidth >= 250 && newWidth <= 600) setWidth(newWidth);
+      if (newWidth >= 250 && newWidth <= 600) {
+        setWidth(newWidth);
+      }
     };
 
     const onMouseUp = () => {
@@ -87,14 +116,24 @@ function Navigation() {
     document.addEventListener("mouseup", onMouseUp);
   };
 
-  const toggleCollapse = () => setIsCollapsed((prev) => !prev);
+  const toggleCollapse = () => {
+    if (isCollapsed) {
+      // expanding: restore last width
+      setWidth(lastWidth.current);
+    } else {
+      // collapsing: save current width
+      lastWidth.current = width;
+      setWidth(0);
+    }
+    setIsCollapsed((prev) => !prev);
+  };
 
   const resetWidth = () => {
     if (isMobile) {
       setIsCollapsed(false);
     } else {
       setIsCollapsed(false);
-      setWidth(240);
+      setWidth(lastWidth.current);
     }
   };
 
@@ -126,7 +165,7 @@ function Navigation() {
         }`}
         style={{
           width: isCollapsed ? 0 : width,
-          transition: "width 0.1 ease", // <-- smooth animation
+          transition: "width 0.1s ease", // smooth animation
         }}
       >
         <div className={`flex flex-col h-full ${isCollapsed ? "hidden" : ""}`}>
@@ -135,11 +174,11 @@ function Navigation() {
             {/* Collapse button */}
             <div className="px-3 py-3 flex justify-end">
               <button
-                className="h-6 w-6 text-muted-foreground rounded-sm hover:bg-accent cursor-pointer flex items-center justify-center transition-colors"
+                className="h-4 w-4 text-muted-foreground rounded-sm hover:bg-accent cursor-pointer flex items-center justify-center transition-colors"
                 onClick={toggleCollapse}
                 aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
-                <ChevronsLeftIcon className="h-4 w-4" />
+                <ChevronsLeftIcon className="h-6 w-6" />
               </button>
             </div>
 

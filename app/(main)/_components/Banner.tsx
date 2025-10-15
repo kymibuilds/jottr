@@ -38,28 +38,28 @@ function Banner({ documentId }: BannerProps) {
   };
 
   return (
-    <div className="w-full bg-rose-500 border-b border-rose-500/20 px-4 py-1 flex items-center justify-center gap-3">
-      <p className="text-xs text-white font-medium">
+    <div className="w-full bg-red-500 px-4 py-1 flex items-center justify-center gap-3">
+      <p className="text-sm text-white font-medium">
         This note is in the trash
       </p>
       <div className="flex items-center gap-2">
         <Button
           onClick={onRestore}
-          variant="outline"
+          variant="default"
           size="sm"
-          className="h-7 px-3 text-xs bg-white hover:bg-rose-50 border-rose-200"
+          className="h-6 px-2 text-xs bg-white text-red-600 flex items-center gap-1 rounded"
         >
-          <RotateCcw className="h-3 w-3 mr-1.5" />
+          <RotateCcw className="h-4 w-4" />
           Restore
         </Button>
         <Button
           onClick={onRemove}
-          variant="outline"
+          variant="default"
           size="sm"
-          className="h-7 px-3 text-xs bg-white hover:bg-rose-100 border-rose-200 text-rose-700 hover:text-rose-800"
+          className="h-6 px-2 text-xs bg-white text-red-600 flex items-center gap-1 rounded"
         >
-          <Trash2 className="h-3 w-3 mr-1.5" />
-          Delete permanently
+          <Trash2 className="h-4 w-4" />
+          Delete
         </Button>
       </div>
     </div>
