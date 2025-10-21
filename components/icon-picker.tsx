@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import React, { ReactElement, isValidElement } from "react";
+import React, { isValidElement } from "react";
 
 interface IconPickerProps {
   onchange: (icon: string) => void;

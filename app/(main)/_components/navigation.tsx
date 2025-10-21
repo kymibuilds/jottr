@@ -45,7 +45,7 @@ function Navigation() {
     }
     return false;
   });
-  const lastWidth = useRef(width); // store last non-collapsed width
+  const lastWidth = useRef(width);
 
   const resizerRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
@@ -119,10 +119,8 @@ function Navigation() {
 
   const toggleCollapse = () => {
     if (isCollapsed) {
-      // expanding: restore last width
       setWidth(lastWidth.current);
     } else {
-      // collapsing: save current width
       lastWidth.current = width;
       setWidth(0);
     }
@@ -152,7 +150,6 @@ function Navigation() {
 
   return (
     <>
-      {/* Mobile overlay */}
       {isMobile && !isCollapsed && (
         <div
           className="fixed inset-0 bg-black/50 z-40"
@@ -160,7 +157,6 @@ function Navigation() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`group/sidebar h-full bg-secondary overflow-y-auto relative flex flex-col ${
           isMobile
@@ -169,13 +165,11 @@ function Navigation() {
         }`}
         style={{
           width: isCollapsed ? 0 : width,
-          transition: "width 0.1s ease", // smooth animation
+          transition: "width 0.1s ease",
         }}
       >
         <div className={`flex flex-col h-full ${isCollapsed ? "hidden" : ""}`}>
-          {/* Header Section */}
           <div className="flex-shrink-0 border-b border-border/40">
-            {/* Collapse button */}
             <div className="px-3 py-3 flex justify-end">
               <button
                 className="h-4 w-4 text-muted-foreground rounded-sm hover:bg-accent cursor-pointer flex items-center justify-center transition-colors"
@@ -186,13 +180,11 @@ function Navigation() {
               </button>
             </div>
 
-            {/* User section */}
             <div className="px-3 pb-3">
               <UserItem />
             </div>
           </div>
 
-          {/* Main navigation section */}
           <div className="flex-shrink-0 px-3 py-3 border-b border-border/40">
             <nav className="space-y-1">
               <Item
@@ -215,7 +207,6 @@ function Navigation() {
             </nav>
           </div>
 
-          {/* Documents section */}
           <div className="flex-1 overflow-y-auto px-3 py-3">
             <div className="space-y-1">
               <DocumentList />
@@ -223,7 +214,6 @@ function Navigation() {
             </div>
           </div>
 
-          {/* Footer section */}
           <div className="flex-shrink-0 border-t border-border/40 px-3 py-3">
             <Popover>
               <PopoverTrigger asChild>
@@ -247,7 +237,6 @@ function Navigation() {
           </div>
         </div>
 
-        {/* Resize handle */}
         {!isMobile && (
           <div
             ref={resizerRef}
@@ -257,7 +246,6 @@ function Navigation() {
         )}
       </aside>
 
-      {/* Mobile menu button */}
       {isMobile && isCollapsed && (
         <button
           onClick={toggleCollapse}
