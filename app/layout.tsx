@@ -6,6 +6,7 @@ import { ConvexClientProvider } from "@/components/providers/convex-provider";
 import { Toaster } from "sonner";
 import ModalProvider from "@/components/providers/model-provider";
 import { EdgeStoreProvider } from "@/lib/edgestore";
+import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +53,7 @@ export default function RootLayout({
             >
               <Toaster position="bottom-center" />
               <ModalProvider />
+              <Analytics/>
               {children}
             </ThemeProvider>
           </EdgeStoreProvider>

@@ -8,6 +8,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation"; // Add this import
+import { Analytics } from "@vercel/analytics/next"
 
 function Documents() {
   const { user } = useUser();
@@ -44,6 +45,7 @@ function Documents() {
       <Button onClick={onCreate}>
         <PlusCircle className="h-4 w-4 align-middle" /> Create a note
       </Button>
+      <Analytics/>
     </div>
   );
 }
