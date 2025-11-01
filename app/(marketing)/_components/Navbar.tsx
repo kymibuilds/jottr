@@ -29,7 +29,7 @@ function Navbar() {
               <Button variant="ghost" size="sm">Log in</Button>
             </SignInButton>
             <SignInButton mode="modal">
-              <Button size="sm">Get tempori free</Button>
+              <Button size="sm">Get tempori for free</Button>
             </SignInButton>
           </>
         )}
