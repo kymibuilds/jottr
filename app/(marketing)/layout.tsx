@@ -5,7 +5,7 @@ function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className='h-full'>
         <Navbar />
-      <main className='h-full pt-40'>
+      <main className='h-full'>
         {children}
       </main>
     </div>
