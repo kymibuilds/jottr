@@ -14,7 +14,7 @@ function Heading() {
     <div
       className="
         max-w-4xl h-screen space-y-6 text-center
-        dark:bg-transparent dark:text-inherit
+        dark:bg-transparent dark:text-inherit pt-40
       "
     >
       {/* YC Badge */}

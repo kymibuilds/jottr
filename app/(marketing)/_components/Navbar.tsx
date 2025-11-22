@@ -15,7 +15,7 @@ function Navbar() {
   return (
     <div
       className={cn(
-        "z-50 fixed top-0 flex items-center w-full py-2 px-4 md:px-6",
+        "z-50 fixed top-0 flex items-center justify-between w-full py-2 px-4 md:px-6",
         "text-[#2f3437] dark:text-[#2f3437]",
         "bg-white dark:bg-white",
         "transition-colors duration-300 ease-in-out",
@@ -30,7 +30,7 @@ function Navbar() {
     >
       <p className="font-black text-3xl">jottr</p>
 
-      <div className="md:ml-auto flex items-center gap-x-3">
+      <div className="ml-auto flex items-center gap-x-3">
         {isLoading && <Spinner />}
 
         {!isAuthenticated && !isLoading && (
