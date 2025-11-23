@@ -171,7 +171,7 @@ function Navigation() {
           transition: isMobile ? "transform 0.2s ease-out" : "width 0.1s ease",
         }}
       >
-        <div className={`flex flex-col h-full ${isCollapsed ? "hidden" : ""}`}>
+        <div className={`flex flex-col h-full ${!isMobile && isCollapsed ? "hidden" : ""}`}>
           <div className="flex-shrink-0 border-b border-border/40">
             <div className="px-3 py-3 flex justify-end">
               <button
