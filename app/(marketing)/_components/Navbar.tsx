@@ -7,59 +7,59 @@ import { SignInButton, UserButton } from "@clerk/clerk-react";
 import { Spinner } from "@/components/ui/spinner";
 import Link from "next/link";
 import { useConvexAuth } from "convex/react";
+import Logo from "./logo"; // Assuming you might want a separate logo component later
 
 function Navbar() {
   const { isAuthenticated, isLoading } = useConvexAuth();
+  // Detect scroll position
   const scrolled = useScrollTop();
 
   return (
     <div
       className={cn(
-        "z-50 fixed top-0 flex items-center justify-between w-full py-2 px-4 md:px-6",
-        "text-[#2f3437] dark:text-[#2f3437]",
-        "bg-white dark:bg-white",
-        "transition-colors duration-300 ease-in-out",
-        !scrolled && "bg-white dark:bg-white",
+        // Stabilized Geometry: Fixed height h-16 in all states prevents vertical jitter.
+        "z-50 fixed top-0 flex items-center w-full h-16 px-4 md:px-6",
+        // Visual Padding Adjustment for thinner look when not scrolled
+        !scrolled && "py-3", 
+        // Base styling: Set to transparent when not scrolled
+        "bg-transparent",
+        "transition-all duration-300 ease-in-out",
+        // Scrolled styling: Only apply appearance changes (no height change)
         scrolled &&
-          "bg-white/30 dark:bg-white/30 backdrop-blur-md border-b border-neutral-200/30 dark:border-neutral-200/30 shadow-sm"
+          "border-b shadow-sm border-border/50 backdrop-blur-md bg-background/90"
       )}
-      style={{
-        backdropFilter: scrolled ? "blur(8px)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(8px)" : "none",
-      }}
     >
-      <p className="font-black text-3xl">jottr</p>
+      {/* Aesthetic Improvement: Keeping the bold logo but ensuring consistent spacing.
+        Using 'tracking-tight' for a modern feel.
+      */}
+      <p className="font-extrabold text-2xl md:text-3xl tracking-tight text-foreground">
+        jottr
+      </p>
 
-      <div className="ml-auto flex items-center gap-x-3">
-        {isLoading && <Spinner />}
+      {/* Auth/Action Buttons Group */}
+      <div className="ml-auto flex items-center gap-x-2 md:gap-x-4">
+        {isLoading && <Spinner size="lg" />}
 
         {!isAuthenticated && !isLoading && (
           <>
+            {/* Custom Style: Ghost buttons scale slightly on hover for an interactive feel. */}
             <SignInButton mode="modal">
               <Button
-                size="sm"
-                variant="outline"
-                className="
-                  rounded-xl px-4 md:px-10 text-base md:text-lg font-light
-                  bg-transparent border-2 border-neutral-800/70
-                  hover:border-neutral-400 hover:bg-neutral-50
-                  transition-all
-                "
+                size="default"
+                variant="ghost"
+                className="text-base font-medium transition-all duration-150 border border-transparent hover:scale-[1.03]"
               >
                 Log in
               </Button>
             </SignInButton>
 
+            {/* Custom Style: Primary button has shadow and scales slightly. */}
             <SignInButton mode="modal">
               <Button
-                className="
-                  hidden sm:block rounded-xl px-10 text-lg font-light
-                  bg-neutral-900 hover:bg-neutral-800
-                  transition-all
-                "
-                size="lg"
+                size="default"
+                className="hidden sm:inline-flex text-base font-medium transition-all duration-150 rounded-lg shadow-md hover:shadow-lg hover:scale-[1.02]"
               >
-                Get Started
+                Get Jottr Free
               </Button>
             </SignInButton>
           </>
@@ -67,11 +67,15 @@ function Navbar() {
 
         {isAuthenticated && !isLoading && (
           <>
-            <Button size="sm" className="rounded-xl px-6 py-3 font-medium" asChild>
-              <Link href="/documents">Jottr</Link>
+            {/* Custom Style: Ghost button scales slightly on hover for an interactive feel. */}
+            <Button size="default" variant="ghost" asChild>
+              <Link href="/documents" className="text-base font-medium transition-all duration-150 border border-transparent hover:scale-[1.03]">
+                Enter Jottr
+              </Link>
             </Button>
 
-            <UserButton />
+            {/* User Profile Menu */}
+            <UserButton afterSignOutUrl="/" />
           </>
         )}
       </div>
