@@ -1,25 +1,23 @@
 "use client";
 
-import { Spinner } from "@/components/ui/spinner";
 import { useConvexAuth } from "convex/react";
 import { redirect, usePathname } from "next/navigation";
 import Navigation from "./_components/navigation";
 import { SearchCommand } from "@/components/search-command";
 import Navbar from "./_components/navbar";
+import { MorphingSquare } from "@/components/molecule-ui/morphing-square";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const pathname = usePathname();
 
-  // Check if current route is a preview route
   const isPreviewRoute = pathname?.startsWith("/preview/");
   const isMainDocumentsPage = pathname?.endsWith("/documents");
 
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <Spinner size={"lg"} />
-        <p>loading your documents</p>
+      <div className="h-full flex items-center justify-center bg-[#1F1F1F]">
+        <MorphingSquare />
       </div>
     );
   }
