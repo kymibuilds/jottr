@@ -37,7 +37,7 @@ function Documents() {
         className="block"
       />
       <h2 className="text-lg font-medium m-0">
-        welcome to {user?.firstName}&apos;s workspace
+        welcome to {user?.firstName}&apos;s place
       </h2>
       <Button onClick={onCreate}>
         <PlusCircle className="h-4 w-4 mr-2" /> Create a Note
