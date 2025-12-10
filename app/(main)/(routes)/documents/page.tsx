@@ -39,7 +39,7 @@ function Documents() {
         welcome to {user?.firstName}&apos;s place
       </h2>
       <Button onClick={onCreate}>
-        <PlusCircle className="h-4 w-4 mr-2" /> Create a Note
+        <PlusCircle className="h-4 w-4 mr-2" /> Create a new note
       </Button>
     </div>
   );
