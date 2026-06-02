@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
-import { Doc, Id } from "@/convex/_generated/dataModel";
+import { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -12,7 +12,6 @@ import { FileIcon } from "lucide-react";
 interface DocumentListProps {
   parentDocumentId?: Id<"documents">;
   level?: number;
-  data?: Doc<"documents">[];
 }
 
 function DocumentList({ parentDocumentId, level = 0 }: DocumentListProps) {

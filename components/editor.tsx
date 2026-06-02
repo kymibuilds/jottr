@@ -19,9 +19,13 @@ function Editor({ onChange, editable = true, initialContent, preview = false }: 
   const { resolvedTheme } = useTheme();
   const { edgestore } = useEdgeStore();
   
-  const parsedContent: PartialBlock[] | undefined = initialContent
-    ? (JSON.parse(initialContent) as PartialBlock[])
-    : undefined;
+  const parsedContent: PartialBlock[] | undefined = React.useMemo(
+    () =>
+      initialContent
+        ? (JSON.parse(initialContent) as PartialBlock[])
+        : undefined,
+    [initialContent]
+  );
 
   const handleUpload = async (file: File) => {
     const response = await edgestore.publicFiles.upload({

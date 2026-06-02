@@ -1,49 +1,75 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
+import { mutation, query, QueryCtx, MutationCtx } from "./_generated/server";
+import { Doc, Id } from "./_generated/dataModel";
 
-//archive functionality
+// Resolve the authenticated user's id, throwing if the request is unauthenticated.
+const requireUserId = async (ctx: QueryCtx | MutationCtx) => {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new Error("Not Authenticated.");
+  }
+  return identity.subject;
+};
+
+// Resolve a document the caller owns, throwing if it is missing or owned by
+// someone else.
+const requireOwnedDocument = async (
+  ctx: MutationCtx,
+  id: Id<"documents">
+): Promise<{ userId: string; document: Doc<"documents"> }> => {
+  const userId = await requireUserId(ctx);
+  const document = await ctx.db.get(id);
+  if (!document) {
+    throw new Error("Document not found");
+  }
+  if (document.userId !== userId) {
+    throw new Error("Unauthorized");
+  }
+  return { userId, document };
+};
+
+// Walk the descendants of a document, visiting each node before ("pre") or after
+// ("post") its own descendants.
+const forEachDescendant = async (
+  ctx: MutationCtx,
+  userId: string,
+  documentId: Id<"documents">,
+  visit: (id: Id<"documents">) => Promise<unknown>,
+  order: "pre" | "post"
+) => {
+  const children = await ctx.db
+    .query("documents")
+    .withIndex("by_user_parent", (q) =>
+      q.eq("userId", userId).eq("parentDocument", documentId)
+    )
+    .collect();
+
+  for (const child of children) {
+    if (order === "pre") {
+      await visit(child._id);
+      await forEachDescendant(ctx, userId, child._id, visit, order);
+    } else {
+      await forEachDescendant(ctx, userId, child._id, visit, order);
+      await visit(child._id);
+    }
+  }
+};
+
+// archive functionality
 export const archive = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
+    const { userId } = await requireOwnedDocument(ctx, args.id);
 
-    if (!identity) {
-      throw new Error("Not Authenticated.");
-    }
+    const document = await ctx.db.patch(args.id, { isArchived: true });
 
-    const userId = identity.subject;
-
-    const existingDocument = await ctx.db.get(args.id);
-
-    if (!existingDocument) {
-      throw new Error("not found");
-    }
-    if (existingDocument.userId !== userId) {
-      throw new Error("Unauthorized");
-    }
-
-    const recursiveArchive = async (documentId: Id<"documents">) => {
-      const children = await ctx.db
-        .query("documents")
-        .withIndex("by_user_parent", (q) =>
-          q.eq("userId", userId).eq("parentDocument", documentId)
-        )
-        .collect();
-
-      for (const child of children) {
-        await ctx.db.patch(child._id, {
-          isArchived: true,
-        });
-        await recursiveArchive(child._id);
-      }
-    };
-
-    const document = await ctx.db.patch(args.id, {
-      isArchived: true,
-    });
-
-    recursiveArchive(args.id);
+    forEachDescendant(
+      ctx,
+      userId,
+      args.id,
+      (id) => ctx.db.patch(id, { isArchived: true }),
+      "pre"
+    );
 
     return document;
   },
@@ -53,13 +79,7 @@ export const archive = mutation({
 export const getSidebar = query({
   args: { parentDocument: v.optional(v.id("documents")) },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-
-    if (!identity) {
-      throw new Error("Not Authenticated.");
-    }
-
-    const userId = identity.subject;
+    const userId = await requireUserId(ctx);
 
     const documents = await ctx.db
       .query("documents")
@@ -82,13 +102,7 @@ export const create = mutation({
     parentDocument: v.optional(v.id("documents")),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-
-    if (!identity) {
-      throw new Error("Not Authenticated.");
-    }
-
-    const userId = identity.subject;
+    const userId = await requireUserId(ctx);
 
     const document = await ctx.db.insert("documents", {
       title: args.title,
@@ -102,16 +116,10 @@ export const create = mutation({
   },
 });
 
-//fetch archived items.
+// fetch archived items.
 export const getTrash = query({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-
-    if (!identity) {
-      throw new Error("Not Authenticated.");
-    }
-
-    const userId = identity.subject;
+    const userId = await requireUserId(ctx);
 
     const documents = await ctx.db
       .query("documents")
@@ -126,30 +134,16 @@ export const getTrash = query({
 export const restore = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not Authenticated.");
-
-    const userId = identity.subject;
-    const existingDocument = await ctx.db.get(args.id);
-    if (!existingDocument) throw new Error("Document not found");
-    if (existingDocument.userId !== userId) throw new Error("Unauthorized");
-
-    const recursiveRestore = async (documentId: Id<"documents">) => {
-      const children = await ctx.db
-        .query("documents")
-        .withIndex("by_user_parent", (q) =>
-          q.eq("userId", userId).eq("parentDocument", documentId)
-        )
-        .collect();
-
-      for (const child of children) {
-        await ctx.db.patch(child._id, { isArchived: false });
-        await recursiveRestore(child._id);
-      }
-    };
+    const { userId } = await requireOwnedDocument(ctx, args.id);
 
     await ctx.db.patch(args.id, { isArchived: false });
-    await recursiveRestore(args.id);
+    await forEachDescendant(
+      ctx,
+      userId,
+      args.id,
+      (id) => ctx.db.patch(id, { isArchived: false }),
+      "pre"
+    );
 
     return await ctx.db.get(args.id);
   },
@@ -158,30 +152,16 @@ export const restore = mutation({
 export const remove = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not Authenticated.");
+    const { userId } = await requireOwnedDocument(ctx, args.id);
 
-    const userId = identity.subject;
-    const existingDocument = await ctx.db.get(args.id);
-    if (!existingDocument) throw new Error("Document not found");
-    if (existingDocument.userId !== userId) throw new Error("Unauthorized");
-
-    const recursiveRemove = async (documentId: Id<"documents">) => {
-      const children = await ctx.db
-        .query("documents")
-        .withIndex("by_user_parent", (q) =>
-          q.eq("userId", userId).eq("parentDocument", documentId)
-        )
-        .collect();
-
-      for (const child of children) {
-        await recursiveRemove(child._id);
-      }
-
-      await ctx.db.delete(documentId);
-    };
-
-    await recursiveRemove(args.id);
+    await forEachDescendant(
+      ctx,
+      userId,
+      args.id,
+      (id) => ctx.db.delete(id),
+      "post"
+    );
+    await ctx.db.delete(args.id);
 
     return { success: true };
   },
@@ -189,10 +169,7 @@ export const remove = mutation({
 
 export const getSearch = query({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not Authenticated.");
-
-    const userId = identity.subject;
+    const userId = await requireUserId(ctx);
 
     const documents = await ctx.db
       .query("documents")
@@ -204,7 +181,6 @@ export const getSearch = query({
     return documents;
   },
 });
-
 
 export const getById = query({
   args: { documentId: v.id("documents") },
@@ -248,14 +224,7 @@ export const update = mutation({
     isPublished: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not Authenticated.");
-
-    const userId = identity.subject;
-
-    const existingDocument = await ctx.db.get(args.id);
-    if (!existingDocument) throw new Error("Document not found");
-    if (existingDocument.userId !== userId) throw new Error("Unauthorized");
+    await requireOwnedDocument(ctx, args.id);
 
     // Patch only the defined fields directly
     await ctx.db.patch(args.id, {
@@ -273,13 +242,7 @@ export const update = mutation({
 export const removeIcon = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not Authenticated.");
-
-    const userId = identity.subject;
-    const existingDocument = await ctx.db.get(args.id);
-    if (!existingDocument) throw new Error("Document not found");
-    if (existingDocument.userId !== userId) throw new Error("Unauthorized");
+    await requireOwnedDocument(ctx, args.id);
 
     await ctx.db.patch(args.id, { icon: undefined });
     return await ctx.db.get(args.id);
@@ -291,13 +254,7 @@ export const removeCoverImage = mutation({
     id: v.id("documents"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not Authenticated.");
-
-    const userId = identity.subject;
-    const existingDocument = await ctx.db.get(args.id);
-    if (!existingDocument) throw new Error("Document not found");
-    if (existingDocument.userId !== userId) throw new Error("Unauthorized");
+    await requireOwnedDocument(ctx, args.id);
 
     await ctx.db.patch(args.id, { coverImage: undefined });
     return await ctx.db.get(args.id);

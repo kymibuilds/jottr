@@ -26,9 +26,6 @@ import TrashBox from "./TrashBox";
 import { useSearch } from "@/hooks/use-search";
 import { useSettings } from "@/hooks/use-settings";
 
-// FIXED: explicitly typed children
-const TrapFocus = ({ children }: { children: React.ReactNode }) => <>{children}</>;
-
 function Navigation() {
   const router = useRouter();
   const settings = useSettings();
@@ -167,7 +164,7 @@ function Navigation() {
             : ""
           }`}
         style={{
-          width: isMobile && !isCollapsed ? sidebarWidth : sidebarWidth,
+          width: sidebarWidth,
           transform: isMobile ? transformStyle : "none",
           transition: isMobile ? "transform 0.2s ease-out" : "width 0.1s ease",
         }}
@@ -235,12 +232,10 @@ function Navigation() {
                 side={isMobile ? "bottom" : "right"}
                 align="start"
               >
-                <TrapFocus>
-                  <div className="p-4">
-                    <h4 className="font-medium text-sm mb-1">Trash</h4>
-                    <TrashBox />
-                  </div>
-                </TrapFocus>
+                <div className="p-4">
+                  <h4 className="font-medium text-sm mb-1">Trash</h4>
+                  <TrashBox />
+                </div>
               </PopoverContent>
             </Popover>
           </div>

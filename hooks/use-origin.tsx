@@ -15,7 +15,7 @@ function useOrigin() {
     return "";
   }
   
-  return origin; // <-- This was missing!
+  return origin;
 }
 
 export default useOrigin;

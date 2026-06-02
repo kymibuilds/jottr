@@ -6,14 +6,10 @@ export const useScrollTop = (threshold = 20) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > threshold) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(window.scrollY > threshold);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     // call once in case user is already scrolled
     handleScroll();
 
